@@ -1,0 +1,252 @@
+// FitSync AI Prisma Schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum ExerciseCategory {
+  Strength
+  Cardio
+  Flexibility
+  Mobility
+}
+
+enum MuscleGroup {
+  Chest
+  Back
+  Legs
+  Shoulders
+  Arms
+  Core
+  FullBody
+}
+
+enum Equipment {
+  Barbell
+  Dumbbell
+  Machine
+  Bodyweight
+  Cable
+  Other
+}
+
+enum Difficulty {
+  Beginner
+  Intermediate
+  Advanced
+}
+
+enum WorkoutStatus {
+  Planned
+  InProgress
+  Completed
+}
+
+enum Visibility {
+  Private
+  Public
+}
+
+enum GoalType {
+  WEIGHT
+  STRENGTH
+  CONSISTENCY
+  CUSTOM
+}
+
+enum GoalUnit {
+  kg
+  lbs
+  reps
+  workouts
+  percent
+}
+
+// model User {
+//   id                String             @id @default(uuid())
+//   email             String             @unique
+//   name              String?
+//   avatarUrl         String?
+//   passwordHash      String?
+//   role              Role               @default(USER)
+//   emailVerified     DateTime?
+//   twoFactorEnabled  Boolean            @default(false)
+//   createdAt         DateTime           @default(now())
+//   updatedAt         DateTime           @updatedAt
+
+//   sessions          Session[]
+//   verificationToken VerificationToken?
+//   twoFactorToken    TwoFactorToken?
+
+//   // Reverse relations for new models
+//   workouts          Workout[]
+//   goals             Goal[]
+//   progressImages    ProgressImage[]
+
+//   @@map("users")
+// }
+model User {
+  id                String             @id @default(uuid())
+  email             String             @unique
+  name              String?
+  avatarUrl         String?
+  passwordHash      String?
+  role              Role               @default(USER)
+  emailVerified     DateTime?
+  twoFactorEnabled  Boolean            @default(false)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  sessions          Session[]
+  verificationToken VerificationToken?
+  twoFactorToken    TwoFactorToken?
+
+  workouts          Workout[]
+  goals             Goal[]
+  progressImages    ProgressImage[]
+
+  notifications     Notification[]   // <-- ADD THIS LINE
+
+  @@map("users")
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token        String   @unique
+  expiresAt    DateTime
+  ipAddress    String?
+  userAgent    String?
+  createdAt    DateTime @default(now())
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@map("verification_tokens")
+}
+
+model TwoFactorToken {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  code      String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@map("two_factor_tokens")
+}
+
+// New Workout Management models
+model Exercise {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  imageUrl    String?
+  category    ExerciseCategory
+  muscleGroup MuscleGroup
+  equipment   Equipment
+  difficulty  Difficulty
+  createdAt   DateTime @default(now())
+
+  workoutExercises WorkoutExercise[]
+}
+
+model Workout {
+  id              String          @id @default(uuid())
+  userId          String
+  user            User            @relation(fields: [userId], references: [id])
+  title           String
+  date            DateTime
+  notes           String?
+  status          WorkoutStatus   @default(Planned)
+  durationMinutes Int?
+  caloriesBurned  Int?
+  visibility      Visibility      @default(Private)
+  createdAt       DateTime        @default(now())
+
+  workoutExercises WorkoutExercise[]
+}
+
+model WorkoutExercise {
+  id          String   @id @default(uuid())
+  workoutId   String
+  exerciseId  String
+  sets        Int
+  reps        Int?
+  weight      Float?   // generic weight (kg or lbs)
+  durationSec Int?
+  restSeconds Int?
+  notes       String?
+  completed   Boolean  @default(false)
+  order       Int
+
+  workout  Workout  @relation(fields: [workoutId], references: [id])
+  exercise Exercise @relation(fields: [exerciseId], references: [id])
+}
+
+model WorkoutTemplate {
+  id          String @id @default(uuid())
+  title       String
+  description String?
+  exercises   Json   // array of {exerciseId, sets, reps, ...}
+  createdAt   DateTime @default(now())
+}
+
+model Goal {
+  id           String   @id @default(uuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  type         GoalType
+  unit         GoalUnit
+  targetValue  Float
+  currentValue Float?
+  deadline     DateTime?
+  createdAt    DateTime @default(now())
+}
+
+model ProgressImage {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  storagePath String   // path inside Supabase bucket
+  description String?
+  uploadedAt  DateTime @default(now())
+}
+// model Notification {
+//   id          String   @id @default(uuid())
+//   userId      String
+//   user        User     @relation(fields: [userId], references: [id])
+//   type        String   // e.g., 'WORKOUT_CREATED', 'GOAL_COMPLETED', 'TEMPLATE_SAVED'
+//   message     String
+//   read        Boolean  @default(false)
+//   createdAt   DateTime @default(now())
+// }
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  type      String
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
