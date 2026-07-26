@@ -1,6 +1,10 @@
 import type { Metadata } from 'next';
 import '@/styles/globals.css';
 import { AppProvider } from '@/providers/app-provider';
+import { Geist } from "next/font/google";
+import { cn } from "@/lib/utils";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata: Metadata = {
   title: 'FitSync AI - AI-Powered Fitness Companion',
@@ -14,7 +18,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning className="dark">
+    <html lang="en" suppressHydrationWarning className={cn("dark", "font-sans", geist.variable)}>
       <body className="bg-[#080C14] text-slate-100 antialiased selection:bg-brand-500 selection:text-white">
         <AppProvider>{children}</AppProvider>
       </body>
