@@ -81,3 +81,10 @@ export interface Notification {
   message: string;
   read: boolean;
 }
+export interface ProgressAnalyticsData {
+  totalWorkouts: number;
+  completedWorkouts: number;
+  completionRate: number;
+  weeklyProgress: number;
+  currentStreak: number;
+}
