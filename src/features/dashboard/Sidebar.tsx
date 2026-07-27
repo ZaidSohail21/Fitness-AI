@@ -27,10 +27,8 @@ export interface SidebarProps {
 const navItems = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Workouts', href: '/dashboard/workouts', icon: Dumbbell },
-  { name: 'AI Coach', href: '/dashboard/ai-coach', icon: Bot },
   { name: 'Progress', href: '/dashboard/progress', icon: LineChart },
   { name: 'Goals', href: '/dashboard/goals', icon: Target },
-  { name: 'Trainer Chat', href: '/dashboard/chat', icon: MessageSquare },
   { name: 'Notifications', href: '/dashboard/notifications', icon: Bell, badge: 3 },
   { name: 'Settings', href: '/dashboard/settings', icon: Settings },
 ];

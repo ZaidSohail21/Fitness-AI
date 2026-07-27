@@ -97,39 +97,39 @@ enum GoalUnit {
 //   @@map("users")
 // }
 model User {
-  id                String             @id @default(uuid())
-  email             String             @unique
-  name              String?
-  avatarUrl         String?
-  passwordHash      String?
-  role              Role               @default(USER)
-  emailVerified     DateTime?
-  twoFactorEnabled  Boolean            @default(false)
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
+  id               String    @id @default(uuid())
+  email            String    @unique
+  name             String?
+  avatarUrl        String?
+  passwordHash     String?
+  role             Role      @default(USER)
+  emailVerified    DateTime?
+  twoFactorEnabled Boolean   @default(false)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
   sessions          Session[]
   verificationToken VerificationToken?
   twoFactorToken    TwoFactorToken?
 
-  workouts          Workout[]
-  goals             Goal[]
-  progressImages    ProgressImage[]
+  workouts       Workout[]
+  goals          Goal[]
+  progressImages ProgressImage[]
 
-  notifications     Notification[]   // <-- ADD THIS LINE
+  notifications Notification[] // <-- ADD THIS LINE
 
   @@map("users")
 }
 
 model Session {
-  id           String   @id @default(uuid())
-  userId       String
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  token        String   @unique
-  expiresAt    DateTime
-  ipAddress    String?
-  userAgent    String?
-  createdAt    DateTime @default(now())
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
 
   @@map("sessions")
 }
@@ -158,18 +158,20 @@ model TwoFactorToken {
 
 // New Workout Management models
 model Exercise {
-  id          String   @id @default(uuid())
-  name        String   @unique
+  id          String           @id @default(uuid())
+  name        String           @unique
   description String?
   imageUrl    String?
   category    ExerciseCategory
   muscleGroup MuscleGroup
   equipment   Equipment
   difficulty  Difficulty
-  createdAt   DateTime @default(now())
+  createdAt   DateTime         @default(now())
 
   workoutExercises WorkoutExercise[]
 }
+
+
 
 model Workout {
   id              String          @id @default(uuid())
@@ -188,16 +190,16 @@ model Workout {
 }
 
 model WorkoutExercise {
-  id          String   @id @default(uuid())
+  id          String  @id @default(uuid())
   workoutId   String
   exerciseId  String
   sets        Int
   reps        Int?
-  weight      Float?   // generic weight (kg or lbs)
+  weight      Float? // generic weight (kg or lbs)
   durationSec Int?
   restSeconds Int?
   notes       String?
-  completed   Boolean  @default(false)
+  completed   Boolean @default(false)
   order       Int
 
   workout  Workout  @relation(fields: [workoutId], references: [id])
@@ -205,33 +207,34 @@ model WorkoutExercise {
 }
 
 model WorkoutTemplate {
-  id          String @id @default(uuid())
+  id          String   @id @default(uuid())
   title       String
   description String?
-  exercises   Json   // array of {exerciseId, sets, reps, ...}
+  exercises   Json // array of {exerciseId, sets, reps, ...}
   createdAt   DateTime @default(now())
 }
 
 model Goal {
-  id           String   @id @default(uuid())
+  id           String    @id @default(uuid())
   userId       String
-  user         User     @relation(fields: [userId], references: [id])
+  user         User      @relation(fields: [userId], references: [id])
   type         GoalType
   unit         GoalUnit
   targetValue  Float
   currentValue Float?
   deadline     DateTime?
-  createdAt    DateTime @default(now())
+  createdAt    DateTime  @default(now())
 }
 
 model ProgressImage {
   id          String   @id @default(uuid())
   userId      String
   user        User     @relation(fields: [userId], references: [id])
-  storagePath String   // path inside Supabase bucket
+  storagePath String // path inside Supabase bucket
   description String?
   uploadedAt  DateTime @default(now())
 }
+
 // model Notification {
 //   id          String   @id @default(uuid())
 //   userId      String

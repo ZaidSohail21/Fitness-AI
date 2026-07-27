@@ -171,6 +171,58 @@ async function main() {
     });
   }
   console.log("Seeding completed.");
+  // Find existing user
+  const user = await prisma.user.findFirst();
+
+  if (!user) {
+    throw new Error("No user found. Please register one first.");
+  }
+
+  console.log("Using user:", user.email);
+  const workouts = [
+  {
+    title: "Push Day",
+    caloriesBurned: 420,
+    durationMinutes: 50,
+    status: "Completed",
+    daysAgo: 0,
+  },
+  {
+    title: "Leg Day",
+    caloriesBurned: 520,
+    durationMinutes: 60,
+    status: "Completed",
+    daysAgo: 1,
+  },
+  {
+    title: "Pull Day",
+    caloriesBurned: 410,
+    durationMinutes: 45,
+    status: "Completed",
+    daysAgo: 2,
+  },
+  {
+    title: "Upper Body",
+    caloriesBurned: 430,
+    durationMinutes: 45,
+    status: "Planned",
+    daysAgo: -1,
+  },
+];
+for (const workout of workouts) {
+  await prisma.workout.create({
+    data: {
+      userId: user.id,
+      title: workout.title,
+      date: new Date(
+        Date.now() - workout.daysAgo * 24 * 60 * 60 * 1000
+      ),
+      caloriesBurned: workout.caloriesBurned,
+      durationMinutes: workout.durationMinutes,
+      status: workout.status as any,
+    },
+  });
+}
 }
 
 main()
