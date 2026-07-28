@@ -23,7 +23,7 @@ export default function LandingPage() {
             <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
               <Activity className="h-5 w-5" />
             </div>
-            <span className="text-xl font-extrabold text-white tracking-tight">FitSync AI</span>
+            <span className="text-xl font-extrabold text-white tracking-tight">FitSync Tracker</span>
           </Link>
 
           {/* Center Links */}

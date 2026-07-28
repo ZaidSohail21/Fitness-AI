@@ -46,7 +46,7 @@ export function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarProps) {
             <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
               <Activity className="h-5 w-5" />
             </div>
-            <span className="text-lg font-bold text-white tracking-tight">FitSync AI</span>
+            <span className="text-lg font-bold text-white tracking-tight">FitSync Tracker</span>
           </Link>
           {onCloseMobile && (
             <button onClick={onCloseMobile} className="lg:hidden text-slate-400 hover:text-white">

